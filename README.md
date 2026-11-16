@@ -44,3 +44,22 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+
+## Fork improvements
+
+Fixed a family of state-synchronization bugs in the cart context
+(`src/context/DataProvider.tsx`):
+
+* **Atomic updates** — `addToCart` / `removeItem` previously issued two separate
+  `setState` calls that read stale closure values (`state.cartItemCount + 1`),
+  so rapid clicks could lose increments. Each handler is now a single functional
+  `setState(prevState => ...)`.
+* **No more nested mutation** — quantity changes used to mutate the shared item
+  object in place (`c[itemIndex]['quantity'] += 1`). Updates are now immutable
+  (`map` + object spread).
+* **Derived badge count** — `cartItemCount` is no longer stored in state (a
+  second source of truth that could drift). It is derived from
+  `cartItems.reduce(...)`; consumers like the header badge are unchanged.
+* **Repository hygiene** — removed the committed `.firebase/` hosting cache and
+  added it to `.gitignore`.
